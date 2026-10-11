@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#153d35">
+<title>AllesOpEenRij — jouw betaaloverzicht</title>
+<style>
+:root{--green:#153d35;--green2:#e7f1ed;--ink:#17231f;--muted:#66736e;--line:#e1e8e4;--bg:#f5f7f6;--white:#fff;--amber:#fff2d8;--red:#fde8e7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:var(--green);color:white;padding:25px 18px 32px} .wrap{max-width:960px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-size:21px;font-weight:800;letter-spacing:-.5px}.pill{border:1px solid #ffffff55;border-radius:30px;padding:6px 10px;font-size:12px}
+header h1{font-size:clamp(25px,5vw,38px);line-height:1.1;margin:28px 0 8px;letter-spacing:-1px}header p{margin:0;color:#d8e7e1}
+main{max-width:960px;margin:-15px auto 50px;padding:0 14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat,.panel,.item{background:white;border:1px solid var(--line);border-radius:16px}.stat{padding:16px}.stat small{color:var(--muted);display:block}.stat strong{display:block;font-size:clamp(20px,4vw,29px);margin-top:7px;letter-spacing:-.5px}
+.grid{display:grid;grid-template-columns:1fr 1.15fr;gap:14px;margin-top:14px}.panel{padding:18px}.panel h2{font-size:19px;margin:0 0 14px}
+label{display:block;font-size:13px;font-weight:650;margin:12px 0 5px}input,select,textarea{width:100%;padding:11px 12px;border:1px solid #ccd7d1;border-radius:10px;background:white;color:var(--ink);font:inherit}input:focus,select:focus{outline:2px solid #9fc8b8;border-color:var(--green)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:10px;padding:11px 14px;background:var(--green);color:white;font-weight:700;font:inherit;cursor:pointer}.btn:hover{filter:brightness(1.08)}.btn.secondary{background:var(--green2);color:var(--green)}.btn.danger{background:#fff0ef;color:#a12d27}.full{width:100%;margin-top:15px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar select{width:auto;flex:1;min-width:130px}
+.list{display:grid;gap:10px}.item{padding:14px;display:grid;grid-template-columns:1fr auto;gap:12px}.item h3{margin:0;font-size:16px}.meta{font-size:13px;color:var(--muted);margin-top:4px}.amount{font-weight:800;font-size:18px;text-align:right;white-space:nowrap}.status{display:inline-block;margin-top:7px;padding:3px 8px;border-radius:20px;background:var(--amber);font-size:12px}.status.paid{background:var(--green2);color:var(--green)}.status.late{background:var(--red);color:#9b2924}.item-actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}.item-actions .btn{padding:7px 10px;font-size:13px}
+.notice{font-size:12px;color:var(--muted);padding:14px 3px 0}.empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed #cbd7d1;border-radius:12px}
+.links{display:flex;gap:8px;flex-wrap:wrap}.links a{color:var(--green);font-weight:650;text-decoration:none;background:var(--green2);border-radius:9px;padding:9px 11px;font-size:13px}.links a:hover{text-decoration:underline}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:0 18px 28px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:21px}.panel{padding:15px}}
+@media(max-width:390px){.stats{grid-template-columns:1fr}.stat strong{font-size:24px}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="top"><div class="brand">▦ AllesOpEenRij</div><span class="pill">Prototype · versie 1</span></div>
+  <h1>Al je betalingen.<br>Op één plek.</h1>
+  <p>Houd bedragen, deadlines en betaalacties overzichtelijk bij.</p>
+</div></header>
+<main>
+  <section class="stats" aria-label="Samenvatting">
+    <div class="stat"><small>Openstaand totaal</small><strong id="total">€ 0,00</strong></div>
+    <div class="stat"><small>Nog te betalen</small><strong id="openCount">0</strong></div>
+    <div class="stat"><small>Te laat</small><strong id="lateCount">0</strong></div>
+  </section>
+  <section class="grid">
+    <div>
+      <div class="panel">
+        <h2 id="formTitle">+ Nieuwe betaling toevoegen</h2>
+        <form id="debtForm">
+          <input type="hidden" id="editId">
+          <label for="title">Naam / omschrijving</label><input id="title" required maxlength="90" placeholder="Bijv. verkeersboete">
+          <div class="row">
+            <div><label for="category">Categorie</label><select id="category"><option>Verkeer (CJIB)</option><option>Trein / openbaar vervoer</option><option>Belasting</option><option>Gemeente</option><option>Zorg / verzekering</option><option>Rekening / anders</option></select></div>
+            <div><label for="amount">Bedrag (€)</label><input id="amount" required type="number" min="0.01" max="10000000" step="0.01" placeholder="75,00"></div>
+          </div>
+          <div class="row">
+            <div><label for="due">Uiterste betaaldatum</label><input id="due" type="date"></div>
+            <div><label for="status">Status</label><select id="status"><option value="open">Openstaand</option><option value="paid">Betaald</option><option value="plan">Betalingsregeling aangevraagd</option></select></div>
+          </div>
+          <label for="url">Officiële betaal- of informatiepagina (optioneel)</label><input id="url" type="url" placeholder="https://...">
+          <button class="btn full" id="saveBtn" type="submit">Betaling opslaan</button>
+          <button class="btn secondary full" id="cancelEdit" type="button" hidden>Wijzigen annuleren</button>
+        </form>
+      </div>
+      <div class="panel" style="margin-top:14px">
+        <h2>Officiële websites</h2>
+        <div class="links">
+          <a href="https://www.cjib.nl/" target="_blank" rel="noopener">CJIB ↗</a>
+          <a href="https://www.belastingdienst.nl/" target="_blank" rel="noopener">Belastingdienst ↗</a>
+          <a href="https://www.ns.nl/" target="_blank" rel="noopener">NS ↗</a>
+          <a href="https://mijn.overheid.nl/" target="_blank" rel="noopener">MijnOverheid ↗</a>
+        </div>
+        <p class="notice">De links openen officiële websites. Betalen of een regeling aanvragen gebeurt daar, zolang er geen officiële koppeling bestaat.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Mijn overzicht</h2>
+      <div class="toolbar">
+        <select id="filter"><option value="all">Alle betalingen</option><option value="open">Openstaand</option><option value="paid">Betaald</option><option value="plan">Regeling aangevraagd</option><option value="late">Te laat</option></select>
+        <select id="sort"><option value="due">Sorteer op datum</option><option value="high">Hoogste bedrag</option><option value="new">Nieuwste eerst</option></select>
+      </div>
+      <div id="list" class="list"></div>
+      <p class="notice">Voorbeeldgegevens zijn fictief. Voeg alleen bedragen toe die je zelf hebt gecontroleerd.</p>
+    </div>
+  </section>
+  <p class="notice">Privacytest: gegevens worden alleen in deze browser opgeslagen (localStorage). Dit is geen beveiligde accountsysteem en geen officiële overheidsdienst. Gebruik voor deze demo geen BSN, DigiD, wachtwoorden, dossiernummers of bankgegevens.</p>
+</main>
+<footer>AllesOpEenRij · concept voor Nederland · geen officiële overheidswebsite</footer>
+<script>
+const KEY='allesop1rij_demo_v1';
+const examples=[
+{id:'demo1',title:'Voorbeeld verkeersboete',category:'Verkeer (CJIB)',amount:95,due:'2026-10-20',status:'open',url:'https://www.cjib.nl/',created:1},
+{id:'demo2',title:'Voorbeeld OV-kosten',category:'Trein / openbaar vervoer',amount:25.50,due:'2026-10-05',status:'open',url:'https://www.ns.nl/',created:2},
+{id:'demo3',title:'Voorbeeld rekening betaald',category:'Rekening / anders',amount:42,due:'2026-09-30',status:'paid',url:'',created:3}
+];
+let entries=[];
+try{entries=JSON.parse(localStorage.getItem(KEY)||'null')||examples.map(x=>({...x}));}catch(e){entries=examples.map(x=>({...x}));}
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'}).format(n);
+const today=()=>new Date().toISOString().slice(0,10);
+const late=e=>e.status!=='paid'&&e.due&&e.due<today();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(entries));}catch(e){alert('Opslaan in deze browser is niet gelukt.');}}
+function safeUrl(s){try{const u=new URL(s);return ['https:','http:'].includes(u.protocol)?u.href:''}catch(e){return ''}}
+function render(){
+ const outstanding=entries.filter(e=>e.status!=='paid');
+ $('total').textContent=money(outstanding.reduce((s,e)=>s+Number(e.amount),0));
+ $('openCount').textContent=outstanding.length;
+ $('lateCount').textContent=outstanding.filter(late).length;
+ let arr=[...entries],f=$('filter').value;
+ if(f==='late')arr=arr.filter(late);else if(f!=='all')arr=arr.filter(e=>e.status===f);
+ const sort=$('sort').value;
+ arr.sort((a,b)=>sort==='high'?b.amount-a.amount:sort==='new'?b.created-a.created:(a.due||'9999').localeCompare(b.due||'9999'));
+ const list=$('list');list.innerHTML='';
+ if(!arr.length){list.innerHTML='<div class="empty">Geen betalingen gevonden. Voeg links je eerste betaling toe.</div>';return;}
+ arr.forEach(e=>{
+  const el=document.createElement('article');el.className='item';
+  const left=document.createElement('div'),right=document.createElement('div');
+  const h=document.createElement('h3');h.textContent=e.title;
+  const meta=document.createElement('div');meta.className='meta';meta.textContent=e.category+(e.due?' · Uiterste datum: '+e.due:'');
+  const badge=document.createElement('span');badge.className='status'+(e.status==='paid'?' paid':late(e)?' late':'');
+  badge.textContent=e.status==='paid'?'Betaald':e.status==='plan'?'Regeling aangevraagd':late(e)?'Te laat':'Openstaand';
+  left.append(h,meta,badge);right.className='amount';right.textContent=money(Number(e.amount));
+  const actions=document.createElement('div');actions.className='item-actions';
+  const edit=document.createElement('button');edit.className='btn secondary';edit.textContent='Bewerken';edit.onclick=()=>startEdit(e.id);
+  const toggle=document.createElement('button');toggle.className='btn secondary';toggle.textContent=e.status==='paid'?'Markeer openstaand':'Markeer betaald';toggle.onclick=()=>{e.status=e.status==='paid'?'open':'paid';save();render();};
+  actions.append(edit,toggle);
+  const link=safeUrl(e.url);if(link){const a=document.createElement('a');a.href=link;a.target='_blank';a.rel='noopener';a.className='btn secondary';a.style.textDecoration='none';a.textContent='Open website ↗';actions.append(a);}
+  const del=document.createElement('button');del.className='btn danger';del.textContent='Verwijderen';del.onclick=()=>{if(confirm('Deze betaling uit je lokale overzicht verwijderen?')){entries=entries.filter(x=>x.id!==e.id);save();render();}};actions.append(del);
+  el.append(left,right,actions);list.append(el);
+ });
+}
+function resetForm(){ $('debtForm').reset();$('editId').value='';$('formTitle').textContent='+ Nieuwe betaling toevoegen';$('saveBtn').textContent='Betaling opslaan';$('cancelEdit').hidden=true; }
+function startEdit(id){const e=entries.find(x=>x.id===id);if(!e)return;$('editId').value=e.id;$('title').value=e.title;$('category').value=e.category;$('amount').value=e.amount;$('due').value=e.due||'';$('status').value=e.status;$('url').value=e.url||'';$('formTitle').textContent='Betaling bewerken';$('saveBtn').textContent='Wijzigingen opslaan';$('cancelEdit').hidden=false;window.scrollTo({top:0,behavior:'smooth'});}
+$('debtForm').addEventListener('submit',ev=>{ev.preventDefault();const id=$('editId').value;const item={id:id||('id'+Date.now()),title:$('title').value.trim(),category:$('category').value,amount:Math.round(Number($('amount').value)*100)/100,due:$('due').value,status:$('status').value,url:safeUrl($('url').value.trim()),created:id?(entries.find(e=>e.id===id)?.created||Date.now()):Date.now()};if(!item.title||!Number.isFinite(item.amount)||item.amount<=0)return;if(id)entries=entries.map(e=>e.id===id?item:e);else entries.push(item);save();resetForm();render();});
+$('cancelEdit').addEventListener('click',resetForm);$('filter').addEventListener('change',render);$('sort').addEventListener('change',render);
+render();
+</script>
+</body>
+</html>
